@@ -34,12 +34,19 @@
 #include <Adafruit_MCP23017.h>
 #include <Adafruit_NeoPixel.h>
 
+#define STRIP_PIN_7 7
+#define MOOD_PIN_8 8
+#define STRIP_PIXELS 60
+
+Adafruit_NeoPixel stripPixels(STRIP_PIXELS, STRIP_PIN_7, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel moodStrip(STRIP_PIXELS, MOOD_PIN_8, NEO_GRB + NEO_KHZ800);
+
 // ====================== CONFIGURATION (verify on your build) ===========
 #define NUM_SQUARES        64
 #define NEOPIXEL_PIN       6        // free Mega digital pin -> NeoPixel DIN (through ~330ohm resistor)
 #define MCP_COUNT          4
-#define POLL_INTERVAL_MS   150       // reed-switch scan period (33Hz - plenty for a turn-based game)
-#define LED_BRIGHTNESS     120      // 0-255, tune to your power budget (64 LEDs @ full draw ~3.8A)
+#define POLL_INTERVAL_MS   50       // reed-switch scan period (33Hz - plenty for a turn-based game)
+#define LED_BRIGHTNESS     200      // 0-255, tune to your power budget (64 LEDs @ full draw ~3.8A)
 
 // MCP23017 I2C addresses are set by tying A0/A1/A2 pins on each chip:
 //   chip 0 -> A2=GND A1=GND A0=GND  -> 0x20  (squares index 0-15)
@@ -166,30 +173,45 @@ void handleShowMoves(const String &args) {
 
 void processCommand(String line) {
   line.trim();
-  if (line.length() == 0) return;
-
-  if (line == "PING") {
-    Serial.println("PONG:MEGA_CHESSBOARD_V1");
-  } else if (line == "CLEARLEDS") {
-    clearAllLeds();
-    Serial.println("ACK:CLEARLEDS");
-  } else if (line == "WINGREEN" || line == "CHECKMATE_GREEN") {
-    allGreen();
-    Serial.println("ACK:WINGREEN");
-  } else if (line == "GETSTATE") {
-    sendState();
-  } else if (line.startsWith("SHOWMOVES:")) {
-    handleShowMoves(line.substring(10));
+  if (line == "CLEARLEDS") { 
+    strip.clear(); 
+    strip.show(); 
+    Serial.println("ACK:CLEARLEDS"); 
+  }
+  else if (line == "WINGREEN") { 
+    for(int i=0; i<NUM_SQUARES; i++) setPixel(i, COLOR_GREEN); 
+    strip.show(); 
+    Serial.println("ACK:WINGREEN"); 
+  }
+  else if (line.startsWith("SHOWMOVES:")) {
+    int sep = line.indexOf(':', 10);
+    String b = line.substring(10, sep);
+    String r = line.substring(sep + 1);
+    strip.clear();
+    int s1 = 0; while(s1 < (int)b.length()) { int c = b.indexOf(',', s1); String t = (c==-1) ? b.substring(s1) : b.substring(s1, c); t.trim(); if(t.length()>0) setPixel(squareToIndex(t), COLOR_BLUE); s1 = (c==-1) ? b.length() : c+1; }
+    int s2 = 0; while(s2 < (int)r.length()) { int c = r.indexOf(',', s2); String t = (c==-1) ? r.substring(s2) : r.substring(s2, c); t.trim(); if(t.length()>0) setPixel(squareToIndex(t), COLOR_RED); s2 = (c==-1) ? r.length() : c+1; }
+    strip.show(); 
     Serial.println("ACK:SHOWMOVES");
-  } else {
-    Serial.print("ERR:UNKNOWN_CMD:");
-    Serial.println(line);
+  }
+  else if (line.startsWith("COLOR_")) {
+    String c = line.substring(6);
+    if (c == "BLUE") setMoodColor(0, 0, 255);
+    else if (c == "RED") { setMoodColor(255, 0, 0); delay(1000); setMoodColor(255, 255, 255); }
+    else if (c == "GREEN") { setMoodColor(0, 255, 0); delay(1000); setMoodColor(255, 255, 255); }
+    else if (c == "WHITE") setMoodColor(255, 255, 255);
+    Serial.println("ACK:COLOR");
   }
 }
 
+
+
 void setup() {
   Serial.begin(115200);
+ 
   Wire.begin();
+  // පහත පේළි 2 අලුතින් එකතු කරන්න
+  Wire.setWireTimeout(3000, true); // මයික්‍රෝ තත්පර 3000කට පසු I2C හිරවුණොත් ස්වයංක්‍රීයව රීසෙට් කරන්න
+  Wire.clearWireTimeoutFlag();
 
   for (int i = 0; i < MCP_COUNT; i++) {
     mcp[i].begin(i);                 // address offset 0..3 -> 0x20..0x23
@@ -207,6 +229,19 @@ void setup() {
   for (int i = 0; i < NUM_SQUARES; i++) lastState[i] = false;
 
   Serial.println("READY:MEGA_CHESSBOARD_V1");
+
+  stripPixels.begin();
+  moodStrip.begin();
+
+  for(int i = 0; i < STRIP_PIXELS; i++) {
+    stripPixels.setPixelColor(i, stripPixels.Color(173, 216, 230));
+  }
+  stripPixels.show();
+
+  for(int i = 0; i < STRIP_PIXELS; i++) {
+    moodStrip.setPixelColor(i, moodStrip.Color(255, 255, 255));
+  }
+  moodStrip.show();
 }
 
 void loop() {
@@ -225,4 +260,11 @@ void loop() {
     lastPoll = now;
     scanSwitches();
   }
+}
+
+void setMoodColor(int r, int g, int b) {
+  for(int i = 0; i < STRIP_PIXELS; i++) {
+    moodStrip.setPixelColor(i, moodStrip.Color(r, g, b));
+  }
+  moodStrip.show();
 }
