@@ -73,21 +73,39 @@ void enableDrivers(bool en) {
 }
 
 bool tryTraySlot(const String &sq, float &xmm, float &ymm) {
+  // Promotion waladi ganna Reserve Queen ge position eka (Board eken udin wam paththe)
   if (sq.equalsIgnoreCase("RES_Q1")) {
-    xmm = RESERVE_Q_X_MM;
-    ymm = RESERVE_Q_Y_MM;
+    xmm = -45.0; 
+    ymm = -65.0;
     return true;
   }
+  
   String upper = sq;
   upper.toUpperCase();
+  
   if (upper.startsWith("TRAY_W") || upper.startsWith("TRAY_B")) {
-    int n = upper.substring(6).toInt();
-    if (n < 1) return false;
-    int row = (n - 1) / TRAY_ROWS_PER_SIDE;
-    int col = (n - 1) % TRAY_ROWS_PER_SIDE;
-    float sideOffset = upper.startsWith("TRAY_B") ? TRAY_SIDE_GAP_MM : 0.0;
-    xmm = TRAY_ORIGIN_X_MM + col * TRAY_SLOT_PITCH_MM;
-    ymm = TRAY_ORIGIN_Y_MM + sideOffset + row * TRAY_SLOT_PITCH_MM;
+    int n = upper.substring(6).toInt();   // Piece number eka (1, 2, 3...)
+    
+    // REQUIREMENT 3: Pieces 16k capture wunama apahu 1 idan patan ganma (Modulo Logic)
+    n = ((n - 1) % 16) + 1; 
+
+    // Pieces 16 eka peliyata thiyanna ida madi nisa, peli (columns) 2kata bedamu.
+    int row = (n - 1) % 8; // X axis digata position eka (0 idan 7 wenakan)
+    int col = (n - 1) / 8; // Y axis digata column eka (0 ho 1)
+
+    // X axis eke dura (Ranks digata eka langa pieces thiyena dura = 45mm gap ekak)
+    xmm = 10.0 + (row * 45.0); 
+    
+    if (upper.startsWith("TRAY_W")) {
+       // REQUIREMENT 1 & 2: White pieces 'a' file eken (Y=0) 65mm eliyata.
+       // Column 2k thiyena nisa dewani column eka thawa 35mm athata yanawa.
+       ymm = -65.0 - (col * 35.0); 
+    } else {
+       // REQUIREMENT 1 & 2: Black pieces 'h' file eken 65mm eliyata.
+       float h_file_y = 7.0 * SQUARE_PITCH_MM; // h-file eke Y position eka
+       ymm = h_file_y + 65.0 + (col * 35.0);
+    }
+    
     return true;
   }
   return false;
