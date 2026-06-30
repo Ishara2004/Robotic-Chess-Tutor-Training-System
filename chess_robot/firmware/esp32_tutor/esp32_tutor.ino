@@ -21,17 +21,17 @@
 
 // ============================ PIN MAP ===================================
 #define SERVO_RIGHT_ARM_PIN    13
-#define SERVO_RIGHT_WRIST_PIN  4
-#define SERVO_LEFT_ARM_PIN     16
-#define SERVO_HEAD_PIN         17
-#define NEOPIXEL_PIN           5
+#define SERVO_RIGHT_WRIST_PIN  14 
+#define SERVO_LEFT_ARM_PIN     23
+#define SERVO_HEAD_PIN         12
+#define NEOPIXEL_PIN           27
 #define NUM_EYE_PIXELS         5
 
 #define I2S_BCLK_PIN   26     // MAX98357A BCLK
 #define I2S_LRC_PIN    25     // MAX98357A LRC / WS
 #define I2S_DOUT_PIN   22     // MAX98357A DIN
 
-#define EYE_BRIGHTNESS  120
+#define EYE_BRIGHTNESS  200
 #define NEUTRAL_ANGLE   90    // servo "rest" position for all 4 servos
 
 // Gesture angles taken directly from the source design notes:
