@@ -18,7 +18,18 @@
 #define ENABLE_PIN    8     // CNC Shield එකේ නිවැරදි Enable පින් එක
 
 #define Z_LIMIT_PIN   11    // Z-Limit ස්විචය (Z+ Endstop)
-#define GRIPPER_PIN   9     // Servo මෝටරය (X+ Endstop)
+
+// IMPORTANT: D9/D10/D11 are NOT free GPIO on a CNC Shield V3 - they are
+// hard-wired to the X/Y/Z limit-switch headers, each with its own
+// pull-up resistor and (on v3.51 boards) an RC noise/debounce filter
+// built for slow mechanical switches. Driving a servo's 1-2ms PWM pulse
+// through that filter is why the gripper was unresponsive - the filter
+// rounds off the pulse edges the servo needs to decode its position.
+// A4/A5 are the only pins left completely untouched by the shield (they
+// are only broken out for optional I2C, unused on this board), so the
+// gripper servo signal wire must be connected to the Arduino's A4 pin
+// directly (NOT through any CNC Shield screw terminal).
+#define GRIPPER_PIN   A4
 #define STATUS_LED    13    // Onboard LED
 
 // ===================== MECHANICAL CALIBRATION ===========================
