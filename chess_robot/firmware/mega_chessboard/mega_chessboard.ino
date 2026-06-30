@@ -173,7 +173,16 @@ void handleShowMoves(const String &args) {
 
 void processCommand(String line) {
   line.trim();
-  if (line == "CLEARLEDS") { 
+  if (line == "PING") {
+    // REQUIRED for serial_comm.py's auto-detection handshake. Without
+    // this, BoardConnection.connect() can never identify this board and
+    // "MEGA connection failed" forever, regardless of wiring/COM port.
+    Serial.println("PONG:MEGA_CHESSBOARD_V1");
+  }
+  else if (line == "GETSTATE") {
+    sendState();
+  }
+  else if (line == "CLEARLEDS") { 
     strip.clear(); 
     strip.show(); 
     Serial.println("ACK:CLEARLEDS"); 
@@ -200,6 +209,10 @@ void processCommand(String line) {
     else if (c == "GREEN") { setMoodColor(0, 255, 0); delay(1000); setMoodColor(255, 255, 255); }
     else if (c == "WHITE") setMoodColor(255, 255, 255);
     Serial.println("ACK:COLOR");
+  }
+  else {
+    Serial.print("ERR:UNKNOWN_CMD:");
+    Serial.println(line);
   }
 }
 
