@@ -1,0 +1,18 @@
+# Chess Robotic Tutor and Training System - Python dependencies
+# Install with:  pip install -r requirements.txt --break-system-packages
+#
+# Two things this file CANNOT install for you - get these separately:
+#   1. Stockfish engine binary  (https://stockfishchess.org/download/)
+#      -> set its path in config.py as STOCKFISH_PATH
+#   2. ffmpeg  (system package, required by pydub for audio conversion)
+#      -> Debian/Ubuntu: sudo apt install ffmpeg
+#      -> Windows: https://ffmpeg.org/download.html (add to PATH)
+
+pyserial>=3.5
+python-chess>=1.10.0
+kivy>=2.3.0
+matplotlib>=3.8.0
+pyttsx3>=2.90
+pydub>=0.25.1
+berserk>=0.13.2
+google-generativeai>=0.8.0
