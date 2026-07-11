@@ -46,18 +46,19 @@
 
 #define XY_MAX_SPEED   8000.0   
 #define XY_ACCEL       4000.0   
-#define Z_MAX_SPEED    6000.0
+#define Z_MAX_SPEED    8000.0
 #define Z_ACCEL        4000.0
 #define Z_HOMING_SPEED 2000.0
 #define Z_HOME_BACKOFF_MM  3.0
 
 // Pick/place descend depth from the Z-home (fully retracted) position.
-#define DEPTH_KING_QUEEN_MM   150.0 
-#define DEPTH_OTHER_MM        170.0 
+#define DEPTH_KING_QUEEN_MM   160.0 
+#define DEPTH_OTHER_MM        180.0
+#define DEPTH_KNIGHT_MM        170.0
 
 // Gripper servo angles
 #define GRIP_CLOSE_ANGLE   120     
-#define GRIP_OPEN_ANGLE    0 
+#define GRIP_OPEN_ANGLE    0
 
 // Flip these to -1 after a calibration test-run if a given axis moves backwards.
 #define X_DIR_SIGN   1
@@ -70,6 +71,9 @@
 #define TRAY_SIDE_GAP_MM     40.0    
 #define RESERVE_Q_X_MM       480.0
 #define RESERVE_Q_Y_MM       -40.0
+
+#define LIFT_KING_QUEEN_MM    20.0
+#define LIFT_OTHER_MM         70.0
 
 // මෙහි දැන් ඇත්තේ X සඳහා එක් මෝටරයක් පමණි (Clone වීම Hardware මගින් සිදුවේ)
 AccelStepper stepX(AccelStepper::DRIVER, X_STEP_PIN, X_DIR_PIN);
@@ -110,11 +114,11 @@ bool tryTraySlot(const String &sq, float &xmm, float &ymm) {
     if (upper.startsWith("TRAY_W")) {
        // REQUIREMENT 1 & 2: White pieces 'a' file eken (Y=0) 65mm eliyata.
        // Column 2k thiyena nisa dewani column eka thawa 35mm athata yanawa.
-       ymm = -65.0 - (col * 35.0); 
+       ymm = -55.0 - (col * 35.0); 
     } else {
        // REQUIREMENT 1 & 2: Black pieces 'h' file eken 65mm eliyata.
        float h_file_y = 7.0 * SQUARE_PITCH_MM; // h-file eke Y position eka
-       ymm = h_file_y + 65.0 + (col * 35.0);
+       ymm = h_file_y + 55.0 + (col * 35.0);
     }
     
     return true;
@@ -178,7 +182,14 @@ void moveZTo(long targetZ) {
 float depthForPiece(String pieceType) {
   pieceType.toUpperCase();
   if (pieceType == "K" || pieceType == "Q") return DEPTH_KING_QUEEN_MM;
+  if (pieceType == "N") return DEPTH_KNIGHT_MM;
   return DEPTH_OTHER_MM;
+}
+
+float liftForPiece(String pieceType) {
+  pieceType.toUpperCase();
+  if (pieceType == "K" || pieceType == "Q") return LIFT_KING_QUEEN_MM;
+  return LIFT_OTHER_MM;
 }
 
 void doPick(String pieceType) {
@@ -188,7 +199,8 @@ void doPick(String pieceType) {
   moveZTo(depthSteps);
   gripper.write(GRIP_CLOSE_ANGLE);
   delay(300);
-  moveZTo(0);
+  long liftSteps = (long)(liftForPiece(pieceType) * Z_STEPS_PER_MM);
+  moveZTo(liftSteps);
 }
 
 void doPlace(String pieceType) {
