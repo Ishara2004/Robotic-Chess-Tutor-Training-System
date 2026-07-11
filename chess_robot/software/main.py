@@ -5,6 +5,9 @@ import chess
 import config
 import berserk
 import tts_audio
+from pydub import AudioSegment
+import sounddevice as sd
+import numpy as np
 from chess_logic import ChessSession
 from database import Database
 from serial_comm import RobotInterface
@@ -130,8 +133,8 @@ class AppController:
         self.db = Database(config.DB_PATH)
         self.robot = RobotInterface(config)
         self.session = None
-        genai.configure(api_key="AQ.Ab8RN6KTnqJbrI-wQdoZi8oGGeva4jWuWamCAR6yFN859eeJ4Q")
-        self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+        genai.configure(api_key="AIzaSyByL0DmlIvISCmNB4hYh_PcWdoCPEWpPHE")
+        self.gemini_model = genai.GenerativeModel('gemini-flash-latest')
         self.profile_id = None
         self.selected_mode = None
         self.status_text = "Connecting to robot..."
@@ -206,16 +209,14 @@ class AppController:
         
         while self._running and not self.session.board.is_game_over():
             try:
-                # ක්‍රීඩාවේ එක් වටයක් සඳහා Try බ්ලොක් එක ආරම්භ කිරීම
                 if self.session.board.turn == chess.WHITE:
                     self._handle_human_turn()
                 else:
                     self._handle_robot_turn()
             except Exception as e:
-                # දෝෂයක් සිදුවුවහොත් එය මෙහිදී අල්ලාගෙන පද්ධතිය Crash වීම වළක්වයි
                 print(f"[CRITICAL ERROR] At move {self.session.board.fullmove_number}: {e}")
                 self.status_text = "System error, attempting to recover..."
-                time.sleep(2) # පද්ධතිය නැවත ස්ථාපිත වීමට තත්පර 2ක විරාමයක්
+                time.sleep(2)
                 
         if self._running:
             self._handle_game_end()
@@ -263,7 +264,6 @@ class AppController:
         move = self.session.best_move()
         san_move = self.session.board.san(move)
         
-        # Audio සහ Instructions තර්කනය
         if App.get_running_app().current_mode != "Normal Chess Match":
             prompt = (
                 f"You are a friendly and encouraging chess tutor robot playing against a human. "
@@ -275,6 +275,7 @@ class AppController:
                 response = self.gemini_model.generate_content(prompt)
                 explanation = response.text.replace('*', '').strip()
             except Exception as e:
+                print(f"Gemini API Error: {e}")
                 explanation = self.session.describe_move(move)
 
             self.status_text = explanation
@@ -282,21 +283,20 @@ class AppController:
             
             try:
                 pcm = tts_audio.synthesize_to_pcm(explanation, self.cfg.TTS_SAMPLE_RATE)
-                self.robot.speak_pcm(pcm)
+                audio_data = np.frombuffer(pcm, dtype=np.int16)
+                sd.play(audio_data, samplerate=self.cfg.TTS_SAMPLE_RATE)
+                sd.wait()
             except Exception as e:
                 self.status_text += f" (speech failed: {e})"
         else:
             self.status_text = "Tutor is making a move..."
             self.move_log_text += f"Tutor: {san_move}\n"
 
-        # රොබෝගේ මනෝභාවය (Color Feedback) තීරණය කිරීම
-        # හොඳ move එකක් නම් GREEN, නැතිනම් RED
         if self.session.board.is_capture(move): 
             self.robot.send_command("COLOR_GREEN")
         else:
             self.robot.send_command("COLOR_RED")
             
-        # ගෑන්ට්‍රි පාලනය සහ ඉත්තා ඇදීම
         plan = self.session.physical_plan_for_move(move)   
         for step in plan:
             self.robot.gantry_move_to(step["square"])
@@ -305,6 +305,7 @@ class AppController:
             else:
                 self.robot.gantry_place(step["piece"])
         self.robot.gantry_home()
+        self.robot.clear_board_events()
         
         self.session.push(move)
         self.robot.eyes("BLUE")
@@ -313,12 +314,26 @@ class AppController:
         board = self.session.board
         result = "draw"
         if board.is_checkmate():
+            self.robot.send_command("CHECKMATE")
+            try:
+                sound = AudioSegment.from_mp3("checkmate.mp3")
+                
+                sound = sound.set_frame_rate(self.cfg.TTS_SAMPLE_RATE).set_channels(1).set_sample_width(2)
+            
+                audio_data = np.frombuffer(sound.raw_data, dtype=np.int16)
+                sd.play(audio_data, samplerate=self.cfg.TTS_SAMPLE_RATE)
+                sd.wait()
+            except Exception as e:
+                print(f"Sound play failed: {e}")
             if board.turn == chess.BLACK:
                 result = "win"     
-                self.robot.win_green()
+                self.robot.player_win()
                 self.robot.gesture("WIN_PLAYER")
             else:
                 result = "loss"
+                self.robot.lose_red()
+                self.robot.gesture("WIN_ROBOT")
+                tts_audio.play_local_mp3(self.cfg.LOSE_SOUND_MP3)
         accuracy = 100.0   
         self.db.record_game(self.profile_id, "Standard", self.session.level, result, accuracy)
         self.status_text = f"Game over: {result}"

@@ -232,7 +232,16 @@ class RobotInterface:
         self.mega.send("CLEARLEDS")
 
     def win_green(self):
-        self.mega.send("WINGREEN")
+        self.mega.send("PLAYER_WIN")
+
+    def lose_red(self):
+        self.mega.send("ROBOT_WIN")
+
+    def player_win(self):
+        self.mega.send("PLAYER_WIN")
+
+    def robot_win(self):
+        self.mega.send("ROBOT_WIN")
 
     def board_state(self):
         """Returns the 64-bit occupancy snapshot as a hex string."""
@@ -253,6 +262,14 @@ class RobotInterface:
                     sq, state = parts[1], parts[2]
                     events.append((sq, state))
         return events
+    
+    def clear_board_events(self):
+        """Discards any pending SQEVT events without returning them."""
+        while not self.mega.event_queue.empty():
+            try:
+                self.mega.event_queue.get_nowait()
+            except queue.Empty:
+                break
 
     # ---------------- Gantry (Uno) ----------------
     def gantry_home(self):

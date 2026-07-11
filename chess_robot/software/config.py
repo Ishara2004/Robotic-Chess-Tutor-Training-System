@@ -19,6 +19,7 @@ PORT_UNO = None      # Gantry board       -> identifies itself as UNO_GANTRY_V1
 PORT_ESP32 = None    # Robotic tutor board -> identifies itself as ESP32_TUTOR_V1
 BAUD_RATE = 115200
 SERIAL_TIMEOUT_S = 2.0
+LOSE_SOUND_MP3 = "checkmate.mp3"
 
 # ---------------------------------------------------------------------
 # Chess engine (Stockfish via the UCI protocol through python-chess).
