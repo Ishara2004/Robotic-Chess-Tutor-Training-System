@@ -188,9 +188,21 @@ void processCommand(String line) {
     Serial.println("ACK:CLEARLEDS"); 
   }
   else if (line == "WINGREEN") { 
-    for(int i=0; i<NUM_SQUARES; i++) setPixel(i, COLOR_GREEN); 
+    strip.clear();
     strip.show(); 
     Serial.println("ACK:WINGREEN"); 
+  }
+  else if (line == "PLAYER_WIN") {
+    for(int i=0; i<NUM_SQUARES; i++) setPixel(i, COLOR_GREEN);
+    strip.show();
+    setMoodColor(255, 255, 255);
+    Serial.println("ACK:PLAYER_WIN");
+  }
+  else if (line == "ROBOT_WIN") {
+    for(int i=0; i<NUM_SQUARES; i++) setPixel(i, COLOR_GREEN);
+    strip.show();
+    setMoodColor(255, 0, 0);
+    Serial.println("ACK:ROBOT_WIN");
   }
   else if (line.startsWith("SHOWMOVES:")) {
     int sep = line.indexOf(':', 10);
