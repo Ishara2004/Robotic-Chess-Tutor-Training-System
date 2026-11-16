@@ -264,32 +264,31 @@ All three USB-Serial links operate at **$115200\text{ baud}$**, transmitting pla
 
 ---
 
-## 8. Consolidated Bill of Materials (BOM)
+## 8. Materials
 
-Prices are preserved as recorded in the original hardware documentation (in LKR).
 
 ### 8.1 Smart Chessboard Subsystem
 
-| Component | Quantity | Cost (LKR) |
-|---|---|---|
-| Reed switches | 64 | 7,680 |
-| MCP23017 I/O expander ICs | 4 | 3,800 |
+| Component | Quantity 
+|---|---|
+| Reed switches | 64 | 
+| MCP23017 I/O expander ICs | 4 | 
 | NeoPixel (WS2812) LEDs | 64 | 750 |
-| Chess pieces (magnetic base) | 32 | 2,500 |
-| Physical chessboard | 1 | 12,500 |
-| Arduino MEGA 2560 | 1 | 4,800 |
+| Chess pieces (magnetic base) | 32 | 
+| Physical chessboard | 1 | 
+| Arduino MEGA 2560 | 1 |
 
 ### 8.2 X-Y-Z Gantry & Gripper Subsystem
 
-| Component | Quantity | Cost (LKR) |
-|---|---|---|
-| NEMA 17 stepper motors | 4 | 9,200 |
-| GT2 20T timing pulleys | 6 | 720 |
-| GT2 timing belt ($5\text{ m}$) | 2 | 2,250 |
-| NEMA 17 motor holders | 2 | 560 |
-| 2020 V-Slot aluminum profiles | 4 | 8,640 |
-| Angle brackets | 4 | 800 |
-| V-Slot gantry plate sets | 3 | 4,950 |
+| Component | Quantity |
+|---|---|
+| NEMA 17 stepper motors | 4 |
+| GT2 20T timing pulleys | 6 | 
+| GT2 timing belt ($5\text{ m}$) | 2 |
+| NEMA 17 motor holders | 2 | 
+| 2020 V-Slot aluminum profiles | 4 | 
+| Angle brackets | 4 | 
+| V-Slot gantry plate sets | 3 | 
 | Wire ties | 10 | 100 |
 | T8 lead screw full set | 1 | 1,880 |
 | MG995 servo motor (gripper) | 1 | 1,150 |
@@ -302,8 +301,8 @@ Prices are preserved as recorded in the original hardware documentation (in LKR)
 
 ### 8.3 Animatronic Robotic Tutor & Display Subsystem
 
-| Component | Quantity | Cost (LKR) |
-|---|---|---|
+| Component | Quantity | 
+|---|---|
 | MG90S micro servo motors | 4 | 2,320 |
 | MPI 5008 V4.9 HDMI+USB touchscreen display | 1 | 10,950 |
 | NeoPixel LEDs (eyes) | 5 | 65 |
