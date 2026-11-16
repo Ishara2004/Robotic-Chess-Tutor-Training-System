@@ -24,10 +24,8 @@ Developing the **Chess Robotic Tutor and Training System** at the Faculty of Inf
 8. [Consolidated Bill of Materials (BOM)](#8-consolidated-bill-of-materials-bom)
 9. [Assumptions, Clarifications & Flagged Engineering Ambiguities](#9-assumptions-clarifications--flagged-engineering-ambiguities)
 10. [Core Firmware & Software Implementation (Code & Sinhala Explanations)](#10-core-firmware--software-implementation-code--sinhala-explanations)
-11. [Repository Structure & File Manifest](#11-repository-structure--file-manifest)
-12. [Installation, Calibration & Commissioning Procedure](#12-installation-calibration--commissioning-procedure)
-13. [Safety Notes & Future Enhancements](#13-safety-notes--future-enhancements)
-14. [Viva Presentation — Examiner Q&A Preparation](#14-viva-presentation--examiner-qa-preparation)
+11. [Installation, Calibration & Commissioning Procedure](#12-installation-calibration--commissioning-procedure)
+12. [Safety Notes & Future Enhancements](#13-safety-notes--future-enhancements)
 
 ---
 
